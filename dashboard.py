@@ -1,9 +1,16 @@
+import streamlit as st
 import pandas as pd
 import random
 import time
-from IPython.display import display, clear_output
+
+st.set_page_config(page_title="A&E Wearable Dashboard", layout="wide")
+
+st.title("A&E Waiting Room Monitoring Dashboard")
+st.write("Prototype front-desk dashboard for wearable-based patient monitoring.")
 
 patients = ["P001", "P002", "P003", "P004"]
+
+placeholder = st.empty()
 
 while True:
     patient_data = []
@@ -48,19 +55,20 @@ while True:
 
     df = pd.DataFrame(patient_data)
 
-    clear_output(wait=True)
-    display(df)
+    with placeholder.container():
+        st.subheader("Live Patient Status")
+        st.dataframe(df, use_container_width=True, hide_index=True)
 
-    urgent = df[df["Status"] == "URGENT REASSESSMENT"]
-    review = df[df["Status"] == "REVIEW SUGGESTED"]
+        urgent = df[df["Status"] == "URGENT REASSESSMENT"]
+        review = df[df["Status"] == "REVIEW SUGGESTED"]
 
-    if not urgent.empty:
-        print("URGENT: One or more patients need immediate reassessment.")
-        display(urgent)
-    elif not review.empty:
-        print("WARNING: One or more patients should be reviewed.")
-        display(review)
-    else:
-        print("All monitored patients are currently stable.")
+        if not urgent.empty:
+            st.error("Urgent reassessment needed.")
+            st.dataframe(urgent, use_container_width=True, hide_index=True)
+        elif not review.empty:
+            st.warning("Some patients may need review.")
+            st.dataframe(review, use_container_width=True, hide_index=True)
+        else:
+            st.success("All monitored patients are currently stable.")
 
     time.sleep(2)
